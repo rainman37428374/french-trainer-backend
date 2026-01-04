@@ -150,3 +150,23 @@ def check_answer(data: AnswerRequest):
         "phrase_id": data.phrase_id,
         "analysis": analysis
     }
+from pydantic import BaseModel
+
+class AnalyzeRequest(BaseModel):
+    phrase_id: int
+    answer: str
+
+class AnalyzeResponse(BaseModel):
+    analysis: str
+
+@app.post("/analyze", response_model=AnalyzeResponse)
+def analyze(req: AnalyzeRequest):
+    # ВРЕМЕННО: заглушка (позже подключим ИИ)
+    analysis = (
+        "Перевод: ...\n"
+        "Фраза корректна / некорректна\n"
+        "Разбор: ...\n"
+        "Примеры: ..."
+    )
+    return {"analysis": analysis}
+
