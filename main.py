@@ -159,14 +159,40 @@ class AnalyzeRequest(BaseModel):
 class AnalyzeResponse(BaseModel):
     analysis: str
 
+
+from openai import OpenAI
+
+client = OpenAI()
+
 @app.post("/analyze", response_model=AnalyzeResponse)
 def analyze(req: AnalyzeRequest):
-    # ВРЕМЕННО: заглушка (позже подключим ИИ)
-    analysis = (
-        "Перевод: ...\n"
-        "Фраза корректна / некорректна\n"
-        "Разбор: ...\n"
-        "Примеры: ..."
+    prompt = f"""
+Ты — преподаватель французского языка.
+
+Фраза для отработки:
+{req.phrase_id}
+
+Ответ ученика (на французском):
+{req.answer}
+
+Сделай разбор СТРОГО по структуре:
+
+1) Перевод на русский
+2) Фраза корректна / некорректна
+3) Если некорректна — дай правильный вариант
+4) Краткий грамматический разбор (без воды)
+5) 2 примера с той же конструкцией
+
+Пиши кратко, без лишних объяснений.
+"""
+
+    resp = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.2,
     )
-    return {"analysis": analysis}
+
+    analysis_text = resp.choices[0].message.content.strip()
+    return {"analysis": analysis_text}
+
 
