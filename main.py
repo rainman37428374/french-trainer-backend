@@ -43,9 +43,6 @@ def health():
 # --------------------
 @app.get("/next_phrase")
 def next_phrase():
-    """
-    Возвращает случайную неотработанную фразу
-    """
     res = (
         supabase
         .table("phrases")
@@ -60,7 +57,11 @@ def next_phrase():
         return {"message": "Нет новых фраз"}
 
     phrase = random.choice(data)
-    return phrase
+
+    return {
+        "id": phrase["id"],
+        "phrase_fr": phrase["phrase_rf"]
+    }
 
 
 # --------------------
