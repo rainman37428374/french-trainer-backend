@@ -39,6 +39,16 @@ def next_phrase():
         .execute()
     )
 
+resp = (
+    supabase.table("phrases")
+    .select("*")
+    .eq("status", "empty")
+    .order("random()")
+    .limit(1)
+    .execute()
+)
+
+
     if not res.data:
         return {"message": "Нет новых фраз"}
 
