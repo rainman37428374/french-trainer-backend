@@ -125,3 +125,79 @@ def analyze(req: AnalyzeRequest):
     analysis_text = response.choices[0].message.content.strip()
 
     return {"analysis": analysis_text}
+
+
+class MarkDoneRequest(BaseModel):
+    phrase_id: int
+@app.post("/mark_done")
+def mark_done(req: MarkDoneRequest):
+    supabase \
+        .table("phrases") \
+        .update({"status": "done"}) \
+        .eq("id", req.phrase_id) \
+        .execute()
+
+    return {"status": "ok"}
+
+
+var showDialog by remember { mutableStateOf(false) }
+
+Button(
+    onClick = { showDialog = true },
+    modifier = Modifier
+        .fillMaxWidth()
+        .padding(top = 8.dp)
+) {
+    Text("Добавить новую фразу")
+}
+if (showDialog) {
+    AlertDialog(
+        onDismissRequest = { showDialog = false },
+        confirmButton = {
+            Button(onClick = {
+                scope.launch {
+                    ApiClient.api.addPhrase(
+                        AddPhraseRequest(input)
+                    )
+                    input = ""
+                    showDialog = false
+                }
+            }) {
+                Text("Добавить")
+            }
+        },
+        dismissButton = {
+            Button(onClick = { showDialog = false }) {
+                Text("Отмена")
+            }
+        },
+        title = { Text("Новая фраза") },
+        text = {
+            TextField(
+                value = input,
+                onValueChange = { input = it },
+                placeholder = { Text("Фраза на французском") }
+            )
+        }
+    )
+}
+
+
+
+class AddPhraseRequest(BaseModel):
+    phrase_fr: str
+@app.post("/add_phrase")
+def add_phrase(req: AddPhraseRequest):
+    if not req.phrase_fr.strip():
+        raise HTTPException(status_code=400, detail="Пустая фраза")
+
+    supabase.table("phrases").insert({
+        "phrase_rf": req.phrase_fr,
+        "status": "new",
+        "attempts": 0
+    }).execute()
+
+    return {"status": "added"}
+
+
+
