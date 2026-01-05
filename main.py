@@ -29,15 +29,7 @@ def next_phrase():
     Возвращает следующую неотработанную фразу
     и увеличивает attempts
     """
-    res = (
-        supabase
-        .table("phrases")
-        .select("id, phrase_rf, attempts")
-        .eq("status", "new")
-        .order("id")
-        .limit(1)
-        .execute()
-    )
+    
 
 resp = (
     supabase.table("phrases")
